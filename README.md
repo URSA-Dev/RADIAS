@@ -2,7 +2,7 @@
 
 Professional Risk Intelligence · Treaty and facultative reinsurance
 
-**Live:** https://radius-murex.vercel.app
+**Live:** https://radias-murex.vercel.app
 
 ## What this is
 
@@ -18,24 +18,48 @@ access to render fully:
 ## Deployment pipeline
 
 ```
-local edit  →  git push origin main  →  Vercel builds  →  production
-                git push origin <branch> / open PR  →  Vercel preview URL
+local edit  →  git push origin main   (source of record — does NOT deploy)
+            →  vercel deploy --prod   (what actually publishes)
 ```
 
-Vercel project `radius` (team: Ursa Projects) is connected to this repository
-through the Vercel GitHub App. Deploys are automatic:
+> **Deploys are manual, by design of circumstance rather than choice.**
+> Pushing to `main` does **not** trigger a build. When Vercel created the
+> project on 2026-09-02 it also auto-created a throwaway repo
+> `URSA-Dev/radius` and connected the project to *that* instead of
+> `URSA-Dev/RADIAS`. Until the Git connection is repointed, the CLI is the
+> only route to production.
 
-| Trigger | Result |
+| Action | Result |
 | --- | --- |
-| Push to `main` | Production deploy |
-| Push to any other branch, or a PR | Preview deploy with its own URL |
+| `git push origin main` | Updates the repository. **No deploy.** |
+| `vercel deploy --prod` | Production deploy, aliased to `radias-murex.vercel.app` |
+| `vercel deploy` | Preview deploy with its own URL |
 
-No deploy tokens or GitHub Actions secrets are involved — the GitHub App handles
-authentication.
+Verified 2026-09-04: a CLI production deploy returns `200` on the production
+alias with no login redirect. Raw `radius-<hash>-rbs-projects-…vercel.app`
+deployment URLs *are* behind Vercel Authentication and will `302` to
+`vercel.com/sso-api` — that protection applies to those, not to the production
+alias.
 
-`vercel.json` declares the static configuration: clean URLs, no trailing slash,
-security response headers, and a no-cache policy on `index.html` so a new
-version is picked up immediately.
+Project details:
+
+| | |
+| --- | --- |
+| Project name | `radius` — a typo for `radias`, but load-bearing; renaming changes URLs |
+| Project ID | `prj_VhWqaMww86XyE54CsXXu89V7tvMT` |
+| Owner / scope | Ursa Projects / `rbs-projects-051d48bf` |
+| Production alias | `radias-murex.vercel.app` — note `radias`, not `radius` |
+
+`vercel.json` declares the static configuration: no trailing slash, four
+security response headers, and `Cache-Control: public, max-age=0,
+must-revalidate` applied through a single catch-all `/(.*)` rule, so a new
+version is picked up immediately. It does **not** set `cleanUrls` — that was
+dropped in `6f5096a` because it rewrote `index.html` to `/index`, making an
+`index.html`-specific cache rule unreachable.
+
+`.vercelignore` keeps everything that is not the static site off the CDN:
+`backend/`, `node_modules/`, and the local-only `.claude/`, `CLAUDE.md` and
+`soul.md`.
 
 ## Shipping a new version
 
@@ -48,12 +72,16 @@ git add index.html
 git commit -m "v63: <what changed>"
 git tag -a v63 -m "Version 63"
 git push origin main --follow-tags
+
+# the push does not deploy — publish explicitly
+vercel deploy --prod
 ```
 
-Vercel deploys the push automatically. Verify with:
+Verify:
 
 ```bash
-curl -sI https://radius-murex.vercel.app | head -1
+curl -sI https://radias-murex.vercel.app | head -1        # expect: HTTP/1.1 200 OK
+curl -s https://radias-murex.vercel.app | wc -c           # expect: byte size of index.html
 ```
 
 ## Version history
@@ -62,12 +90,41 @@ curl -sI https://radius-murex.vercel.app | head -1
 | --- | --- | --- |
 | v62 | 2026-09-01 | First version committed to this repository |
 
+`index.html` is unchanged since v62. It was published to production by CLI on
+2026-09-04 (`dpl_H4Qfy99wtHiFJf3DGBamjGoB1TSv`), which is the first deploy this
+repository can actually account for — earlier deployments came from the
+mis-connected `URSA-Dev/radius` repo.
+
+## Assessment services
+
+`backend/` holds the Claude API integrations that sit behind the prototype. They
+are **not** part of the static site and are excluded from every deploy.
+
+| Act | Use case | What it does |
+| --- | --- | --- |
+| 2 | UC-C2 | Public-record extraction with citations — evidence bound to exact source passages |
+| 3 | UC-C4 → UC-V2 | Application vs. record reconciliation, deterministic DVI scoring, verification question pack |
+
+```bash
+cd backend && npm install
+npm run test:offline   # 42 checks, no API key needed
+npm run act2           # needs ANTHROPIC_API_KEY or `ant auth login`
+npm run act3
+```
+
+See `backend/README.md`. Both acts respect the platform's own AI boundary: the
+model classifies and cites, a deterministic engine computes every published
+figure.
+
 ## Repository layout
 
 The directory tree below mirrors the `SSP-Vercel-Build` project so the two
-repositories stay navigable in the same way. The folders are **scaffolding only**
-— they were created empty, without copying any of SSP's source files, tests, or
-configuration.
+repositories stay navigable in the same way. The folders were created **empty**,
+without copying any of SSP's source files, tests, or configuration.
+
+Most are still empty scaffolding. The exception is `backend/`, which now holds
+real code — see [Assessment services](#assessment-services) above. `backend/src/services/scoring/`
+was added there and has no SSP counterpart.
 
 Every folder carries a `README.md` in one consistent shape:
 
@@ -92,7 +149,8 @@ per-folder README also serves a practical purpose: git does not track empty
 directories, so the README is what keeps each folder in the repository.
 
 `index.html` remains the live application. Nothing in this tree is wired into
-the Vercel build yet.
+the Vercel build — `backend/` is excluded by `.vercelignore`, and the placeholder
+READMEs elsewhere are inert.
 
 ```
 RADIAS/

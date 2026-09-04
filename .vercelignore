@@ -1,0 +1,13 @@
+# index.html is the entire static site. Nothing below belongs on the CDN.
+
+# Assessment services — Node/TypeScript source, not part of the static build.
+backend/
+
+# Dependencies
+node_modules/
+
+# Claude Code tooling (also gitignored)
+.claude/
+CLAUDE.md
+soul.md
+.mcp.json
