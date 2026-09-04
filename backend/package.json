@@ -1,0 +1,22 @@
+{
+  "name": "radias-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RADIAS assessment services. Act 2: public-record extraction with citations.",
+  "scripts": {
+    "act2": "tsx --env-file-if-exists=.env scripts/act2-butler-snow.ts",
+    "typecheck": "tsc --noEmit",
+    "test:offline": "tsx tests/map-citations.offline.ts && tsx tests/dvi.offline.ts",
+    "act3": "tsx --env-file-if-exists=.env scripts/act3-hcb-variance.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

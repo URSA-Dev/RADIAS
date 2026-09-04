@@ -14,3 +14,16 @@ desktop.ini
 .idea/
 *.swp
 
+# Claude Code AI tooling (local only — not useful on remote)
+CLAUDE.md
+soul.md
+.mcp.json
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Generated demo output
+backend/evidence.generated.json
+backend/reconciliation.generated.json
