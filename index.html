@@ -1221,13 +1221,10 @@ body.locked .signin{display:flex}
 .signin label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
 .signin input{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 16px;transition:border-color .15s,box-shadow .15s}
 .signin input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,179,198,.18)}
-.signin button.go{width:100%;font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy-2);border:1px solid var(--navy-2);border-radius:6px;padding:11px;cursor:pointer;transition:background .15s}
+.signin button.go{width:100%;font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy-2);border:1px solid var(--navy-2);border-radius:6px;padding:11px;margin-top:4px;cursor:pointer;transition:background .15s}
 .signin button.go:hover{background:var(--navy)}
 .signin .err{font-size:12.5px;color:var(--brick);background:var(--brick-bg);border:1px solid var(--brick);border-radius:5px;padding:8px 10px;margin:0 0 16px;display:none}
 .signin .err.on{display:block}
-.signin .hint{margin:20px 0 0;padding-top:15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;line-height:1.65;color:var(--muted)}
-.signin .hint b{color:var(--ink-2);font-weight:600}
-.signin .warn{display:block;margin-top:9px;color:var(--amber)}
 .signin .sfoot{padding:12px 32px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--muted);background:var(--surface)}
 @media(max-width:460px){.signin .brandbar,.signin .fbody,.signin .sfoot{padding-left:22px;padding-right:22px}}
 .topbar .whoami{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
@@ -1252,8 +1249,6 @@ body.locked .signin{display:flex}
       <label for="siPass">Password</label>
       <input id="siPass" type="password" autocomplete="current-password" placeholder="Password" required>
       <button class="go" type="submit">Sign in</button>
-      <p class="hint">Demo credentials<br><b>testuser1@radias.com</b><br><b>Radias-Demo-2026</b>
-        <span class="warn">Presentation only. This is not access control.</span></p>
     </form>
     <div class="sfoot">MVP Version 62 &middot; 1 Sep 2026 &middot; Model v0.4 (illustrative)</div>
   </div>
@@ -5346,6 +5341,11 @@ LITE_V.process = () => V.process();
 
    It exists so the demo opens the way the product would. It is
    not a security control and must never be described as one.
+
+   NOTE: the credentials were removed from the card for presentation
+   reasons. That changed the appearance only — the credential is still a
+   literal below and still ships to every visitor. Do not read the absence
+   of the on-screen warning as a change in the security posture.
    Real access control belongs at the edge (Vercel Deployment
    Protection), before this file is ever served.
    ============================================================ */
