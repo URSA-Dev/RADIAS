@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Sign in — RADIAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Serif:wght@600&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0C1A2B; --navy-2:#12283F; --paper:#F5F7F8; --surface:#fff;
+  --ink:#111C26; --ink-2:#31414F; --muted:#6B7A88; --line:#DDE3E8;
+  --cyan:#19B3C6; --brick:#9E3F32; --brick-bg:#F8ECEA;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --serif:"IBM Plex Serif",Georgia,serif;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--navy);padding:24px;
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+.card{width:100%;max-width:404px;background:var(--paper);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 22px 60px rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.07)}
+.brandbar{background:var(--navy-2);padding:26px 32px 24px;border-bottom:3px solid var(--cyan)}
+.brandbar img{display:block;width:100%;max-width:118px;height:auto;opacity:.97}
+.pname{margin-top:16px;font-size:20px;font-weight:800;letter-spacing:.06em;line-height:1;color:#fff}
+.pdesc{margin-top:5px;font-size:11.5px;line-height:1.5;color:#8AA0BC}
+.fbody{padding:28px 32px 24px}
+.fh{font-family:var(--serif);font-size:17px;font-weight:600;margin:0 0 3px}
+.fsub{font-size:12.5px;color:var(--muted);margin:0 0 22px}
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+input{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 16px;transition:border-color .15s,box-shadow .15s}
+input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,179,198,.18)}
+button{width:100%;font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy-2);
+  border:1px solid var(--navy-2);border-radius:6px;padding:11px;margin-top:4px;cursor:pointer;transition:background .15s}
+button:hover:not(:disabled){background:var(--navy)}
+button:disabled{opacity:.6;cursor:default}
+.err{font-size:12.5px;color:var(--brick);background:var(--brick-bg);border:1px solid var(--brick);
+  border-radius:5px;padding:8px 10px;margin:0 0 16px;display:none}
+.err.on{display:block}
+.sfoot{padding:12px 32px 16px;border-top:1px solid var(--line);font-family:var(--mono);
+  font-size:10px;line-height:1.7;color:var(--muted);background:var(--surface)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media(max-width:460px){.brandbar,.fbody,.sfoot{padding-left:22px;padding-right:22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brandbar">
+    <img src="/assets/foursyte.png" alt="Foursyte">
+    <div class="pname">RADIAS</div>
+    <div class="pdesc">Professional Risk Intelligence</div>
+  </div>
+  <form class="fbody" id="form" autocomplete="off">
+    <p class="fh">Sign in</p>
+    <p class="fsub">Treaty and facultative reinsurance &middot; Lawyers Professional Liability</p>
+    <div class="err" id="err" role="alert"></div>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="username" spellcheck="false" placeholder="you@example.com" required autofocus>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+    <button id="go" type="submit">Sign in</button>
+  </form>
+  <div class="sfoot">MVP Version 62 &middot; 1 Sep 2026 &middot; Model v0.4 (illustrative)</div>
+</main>
+<script>
+const form = document.getElementById("form");
+const err  = document.getElementById("err");
+const go   = document.getElementById("go");
+
+function fail(msg){ err.textContent = msg; err.classList.add("on");
+  document.getElementById("password").value = ""; document.getElementById("password").focus(); }
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  err.classList.remove("on");
+  go.disabled = true; go.textContent = "Signing in…";
+  try {
+    const r = await fetch("/api/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+      }),
+    });
+    if (r.ok) {
+      /* Cookie is set by the server. Reload so the gate re-evaluates. */
+      window.location.replace("/");
+      return;
+    }
+    const data = await r.json().catch(() => ({}));
+    fail(data.error || "Sign in failed. Please try again.");
+  } catch (e) {
+    fail("Could not reach the sign-in service. Check your connection and try again.");
+  }
+  go.disabled = false; go.textContent = "Sign in";
+});
+</script>
+</body>
+</html>

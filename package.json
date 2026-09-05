@@ -1,0 +1,20 @@
+{
+  "name": "radias",
+  "version": "1.0.0",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/URSA-Dev/RADIAS.git"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/URSA-Dev/RADIAS/issues"
+  },
+  "homepage": "https://github.com/URSA-Dev/RADIAS#readme",
+  "dependencies": {
+    "@vercel/functions": "^3.9.5"
+  },
+  "private": true
+}

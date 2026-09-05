@@ -63,20 +63,65 @@ set `cleanUrls` — dropped in `6f5096a` because it rewrote `index.html` to
 `backend/`, `node_modules/`, and the local-only `.claude/`, `CLAUDE.md` and
 `soul.md`.
 
-## Demo sign-in
+## Access control
 
-The app opens behind a sign-in screen:
+The app is behind a real gate. `middleware.js` runs at the edge before the CDN
+cache and rewrites any request without a valid session cookie to `/login.html`,
+so **`index.html` is never served to an unauthenticated visitor**. Fetching
+`/index.html` directly returns the login page, not the app.
+
+```
+request  →  middleware.js  ──no valid cookie──▶  login.html
+                  │
+            valid cookie
+                  ▼
+             index.html
+```
+
+| Piece | Role |
+| --- | --- |
+| `middleware.js` | The gate. Verifies the signed cookie, rewrites to the login page otherwise. Fails closed if `AUTH_SECRET` is unset. |
+| `api/login.js` | `POST {email,password}` → compares against env vars → sets the cookie |
+| `api/logout.js` | `POST` → expires the cookie |
+| `api/_session.js` | HMAC-SHA256 token sign/verify, constant-time compare, cookie helpers |
+| `login.html` | Standalone branded sign-in page |
+
+**Credentials** (ask the owner — they are not in this repo):
 
 ```
 testuser1@radias.com
-Radias-Demo-2026
 ```
 
-**This is presentation only, not access control.** The credential is a literal in
-`index.html`, the check runs in the browser, and the gate is bypassable from
-devtools. It exists so the demo opens the way the product would. Real gating
-would need Vercel Deployment Protection, which is a paid feature and unavailable
-on the current Hobby plan.
+The password lives only in the `AUTH_PASSWORD` environment variable.
+
+### Environment variables
+
+Set on Vercel for Production, Preview and Development:
+
+| Name | Purpose |
+| --- | --- |
+| `AUTH_EMAIL` | Permitted sign-in address |
+| `AUTH_PASSWORD` | Password, compared server-side. Never sent to the browser. |
+| `AUTH_SECRET` | 32-byte hex key that signs the session cookie |
+
+### How the session works
+
+The cookie is `<expiry>.<hmac>`, signed with `AUTH_SECRET` and valid for 8 hours.
+Nothing is stored server-side. It is `HttpOnly`, `Secure`, `SameSite=Strict`, so
+page scripts cannot read it — verified. A second cookie, `radias_user`, is
+deliberately *not* `HttpOnly` and carries only the email for display in the
+topbar; it grants nothing.
+
+Wrong email and wrong password return the **same** message and status, so
+neither field is disclosed. Both are compared on every attempt, in constant
+time.
+
+### What this does not do
+
+There is no rate limiting. Vercel Functions are stateless, so throttling would
+need a datastore. For a single shared demo credential behind a link that is not
+published, that is an accepted gap — not an oversight. Add Upstash Redis or
+Vercel Firewall rate limiting if the URL is ever circulated widely.
 
 ## Shipping a new version
 
