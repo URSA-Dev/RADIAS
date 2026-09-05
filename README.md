@@ -18,28 +18,24 @@ access to render fully:
 ## Deployment pipeline
 
 ```
-local edit  →  git push origin main   (source of record — does NOT deploy)
-            →  vercel deploy --prod   (what actually publishes)
+local edit  →  git push origin main  →  Vercel builds  →  production
+                git push origin <branch> / open PR  →  Vercel preview URL
 ```
 
-> **Deploys are manual, by design of circumstance rather than choice.**
-> Pushing to `main` does **not** trigger a build. When Vercel created the
-> project on 2026-09-02 it also auto-created a throwaway repo
-> `URSA-Dev/radius` and connected the project to *that* instead of
-> `URSA-Dev/RADIAS`. Until the Git connection is repointed, the CLI is the
-> only route to production.
+Vercel project `radius` (team: Ursa Projects) is connected to this repository
+through the Vercel GitHub App. Deploys are automatic:
 
-| Action | Result |
+| Trigger | Result |
 | --- | --- |
-| `git push origin main` | Updates the repository. **No deploy.** |
-| `vercel deploy --prod` | Production deploy, aliased to `radias-murex.vercel.app` |
-| `vercel deploy` | Preview deploy with its own URL |
+| Push to `main` | Production deploy, aliased to `radias-murex.vercel.app` |
+| Push to any other branch, or a PR | Preview deploy with its own URL |
 
-Verified 2026-09-04: a CLI production deploy returns `200` on the production
-alias with no login redirect. Raw `radius-<hash>-rbs-projects-…vercel.app`
-deployment URLs *are* behind Vercel Authentication and will `302` to
-`vercel.com/sso-api` — that protection applies to those, not to the production
-alias.
+Verified 2026-09-04: a push to `main` produced a production deployment in ~15
+seconds, and GitHub reports two successful Vercel contexts against the commit
+(`Vercel`, `Vercel Deployments – Ursa Projects`).
+
+`vercel deploy --prod` still works and remains useful for publishing without a
+commit, but it is no longer required.
 
 Project details:
 
@@ -47,19 +43,40 @@ Project details:
 | --- | --- |
 | Project name | `radius` — a typo for `radias`, but load-bearing; renaming changes URLs |
 | Project ID | `prj_VhWqaMww86XyE54CsXXu89V7tvMT` |
-| Owner / scope | Ursa Projects / `rbs-projects-051d48bf` |
+| Owner / scope | Ursa Projects (Hobby) / `rbs-projects-051d48bf` |
 | Production alias | `radias-murex.vercel.app` — note `radias`, not `radius` |
+
+> **History worth keeping:** the project was originally connected to
+> `URSA-Dev/radius` — a private throwaway repo auto-created alongside the
+> project, one character away from this one. Pushes here produced no builds
+> because Vercel was watching that repo instead. If deploys ever stop firing,
+> check the connected repository name first. `URSA-Dev/radius` is a candidate
+> for deletion.
 
 `vercel.json` declares the static configuration: no trailing slash, four
 security response headers, and `Cache-Control: public, max-age=0,
-must-revalidate` applied through a single catch-all `/(.*)` rule, so a new
-version is picked up immediately. It does **not** set `cleanUrls` — that was
-dropped in `6f5096a` because it rewrote `index.html` to `/index`, making an
-`index.html`-specific cache rule unreachable.
+must-revalidate` applied through a single catch-all `/(.*)` rule. It does **not**
+set `cleanUrls` — dropped in `6f5096a` because it rewrote `index.html` to
+`/index`, making an `index.html`-scoped cache rule unreachable.
 
 `.vercelignore` keeps everything that is not the static site off the CDN:
 `backend/`, `node_modules/`, and the local-only `.claude/`, `CLAUDE.md` and
 `soul.md`.
+
+## Demo sign-in
+
+The app opens behind a sign-in screen:
+
+```
+testuser1@radias.com
+Radias-Demo-2026
+```
+
+**This is presentation only, not access control.** The credential is a literal in
+`index.html`, the check runs in the browser, and the gate is bypassable from
+devtools. It exists so the demo opens the way the product would. Real gating
+would need Vercel Deployment Protection, which is a paid feature and unavailable
+on the current Hobby plan.
 
 ## Shipping a new version
 
@@ -71,10 +88,7 @@ filenames.
 git add index.html
 git commit -m "v63: <what changed>"
 git tag -a v63 -m "Version 63"
-git push origin main --follow-tags
-
-# the push does not deploy — publish explicitly
-vercel deploy --prod
+git push origin main --follow-tags   # this deploys automatically
 ```
 
 Verify:
@@ -90,10 +104,10 @@ curl -s https://radias-murex.vercel.app | wc -c           # expect: byte size of
 | --- | --- | --- |
 | v62 | 2026-09-01 | First version committed to this repository |
 
-`index.html` is unchanged since v62. It was published to production by CLI on
-2026-09-04 (`dpl_H4Qfy99wtHiFJf3DGBamjGoB1TSv`), which is the first deploy this
-repository can actually account for — earlier deployments came from the
-mis-connected `URSA-Dev/radius` repo.
+`index.html` gained a demo sign-in gate on 2026-09-04 (see **Demo sign-in**
+above); the assessment content is unchanged since v62. Automatic deploys from
+`main` began working the same day, once the project was repointed from
+`URSA-Dev/radius` to this repository.
 
 ## Assessment services
 
