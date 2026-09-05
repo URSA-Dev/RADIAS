@@ -1203,25 +1203,33 @@ details.secfold > summary{padding:11px 0 10px}
 @media (max-width:900px){.start{padding-left:0}.start-rail{position:static;width:auto;flex-direction:column;padding:18px 16px;border-right:0;border-bottom:1px solid rgba(255,255,255,.06)}.srfoot{margin-top:14px}.srlogo{max-width:132px}}
 
 /* ---- Demo sign-in gate -------------------------------------------------
-   Presentation only. The credential below is in this file and the gate is
+   Presentation only. The credential is in this file and the gate is
    bypassable from devtools. It exists so the demo opens like a product; it
-   is NOT access control. Real gating happens at the edge, not here. */
-.signin{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:var(--navy);padding:24px}
+   is NOT access control. Real gating happens at the edge, not here.
+   Brand elements mirror .start-rail so this reads as the same product. */
+.signin{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:var(--navy);padding:24px;overflow:auto}
 body.locked{overflow:hidden}
 body.locked .signin{display:flex}
-.signin .card{width:100%;max-width:392px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:34px 34px 28px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
-.signin .bm{font-family:var(--serif);font-size:25px;font-weight:600;letter-spacing:-.01em;margin:0 0 3px}
-.signin .bd{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 26px}
+.signin .card{width:100%;max-width:404px;background:var(--paper);border-radius:var(--radius);overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.07)}
+.signin .brandbar{background:var(--navy-2);padding:26px 32px 24px;border-bottom:3px solid var(--cyan)}
+.signin .brandbar .srlogo{max-width:118px;margin:0}
+.signin .brandbar .pname{margin-top:16px;font-size:20px;font-weight:800;letter-spacing:.06em;line-height:1;color:#fff}
+.signin .brandbar .pdesc{margin-top:5px;font-size:11.5px;line-height:1.5;color:#8AA0BC}
+.signin .fbody{padding:28px 32px 24px}
+.signin .fh{font-family:var(--serif);font-size:17px;font-weight:600;margin:0 0 3px;color:var(--ink)}
+.signin .fsub{font-size:12.5px;color:var(--muted);margin:0 0 22px}
 .signin label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
-.signin input{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 16px;transition:border-color .15s}
-.signin input:focus{outline:none;border-color:var(--observed);box-shadow:0 0 0 3px rgba(52,85,122,.14)}
-.signin button{width:100%;font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy-2);border:1px solid var(--navy-2);border-radius:6px;padding:11px;cursor:pointer;transition:opacity .15s}
-.signin button:hover{opacity:.9}
+.signin input{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 16px;transition:border-color .15s,box-shadow .15s}
+.signin input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,179,198,.18)}
+.signin button.go{width:100%;font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy-2);border:1px solid var(--navy-2);border-radius:6px;padding:11px;cursor:pointer;transition:background .15s}
+.signin button.go:hover{background:var(--navy)}
 .signin .err{font-size:12.5px;color:var(--brick);background:var(--brick-bg);border:1px solid var(--brick);border-radius:5px;padding:8px 10px;margin:0 0 16px;display:none}
 .signin .err.on{display:block}
-.signin .hint{margin:22px 0 0;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--muted)}
+.signin .hint{margin:20px 0 0;padding-top:15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;line-height:1.65;color:var(--muted)}
 .signin .hint b{color:var(--ink-2);font-weight:600}
 .signin .warn{display:block;margin-top:9px;color:var(--amber)}
+.signin .sfoot{padding:12px 32px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--muted);background:var(--surface)}
+@media(max-width:460px){.signin .brandbar,.signin .fbody,.signin .sfoot{padding-left:22px;padding-right:22px}}
 .topbar .whoami{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
 .topbar .whoami button{font:inherit;color:var(--observed);background:none;border:none;border-bottom:1px solid transparent;padding:0;cursor:pointer}
 .topbar .whoami button:hover{border-bottom-color:var(--observed)}
@@ -1229,18 +1237,26 @@ body.locked .signin{display:flex}
 </head>
 <body class="at-start">
 <section class="signin" id="signin" aria-label="Sign in">
-  <form class="card" id="signinForm" autocomplete="off">
-    <p class="bm">RADIAS</p>
-    <p class="bd">Professional Risk Intelligence</p>
-    <div class="err" id="signinErr" role="alert"></div>
-    <label for="siEmail">Email</label>
-    <input id="siEmail" type="email" autocomplete="username" spellcheck="false" placeholder="you@example.com" required>
-    <label for="siPass">Password</label>
-    <input id="siPass" type="password" autocomplete="current-password" placeholder="Password" required>
-    <button type="submit">Sign in</button>
-    <p class="hint">Demo credentials<br><b>testuser1@radias.com</b><br><b>Radias-Demo-2026</b>
-      <span class="warn">This gate is presentation only. It is not access control.</span></p>
-  </form>
+  <div class="card">
+    <div class="brandbar">
+      <img class="srlogo" id="siLogo" alt="Foursyte">
+      <div class="pname">RADIAS</div>
+      <div class="pdesc">Professional Risk Intelligence</div>
+    </div>
+    <form class="fbody" id="signinForm" autocomplete="off">
+      <p class="fh">Sign in</p>
+      <p class="fsub">Treaty and facultative reinsurance &middot; Lawyers Professional Liability</p>
+      <div class="err" id="signinErr" role="alert"></div>
+      <label for="siEmail">Email</label>
+      <input id="siEmail" type="email" autocomplete="username" spellcheck="false" placeholder="you@example.com" required>
+      <label for="siPass">Password</label>
+      <input id="siPass" type="password" autocomplete="current-password" placeholder="Password" required>
+      <button class="go" type="submit">Sign in</button>
+      <p class="hint">Demo credentials<br><b>testuser1@radias.com</b><br><b>Radias-Demo-2026</b>
+        <span class="warn">Presentation only. This is not access control.</span></p>
+    </form>
+    <div class="sfoot">MVP Version 62 &middot; 1 Sep 2026 &middot; Model v0.4 (illustrative)</div>
+  </div>
 </section>
 <section class="start" id="start" aria-label="Start">
   <aside class="start-rail" aria-label="Brand">
@@ -5372,6 +5388,10 @@ function lock(){
 }
 
 (function initAuth(){
+  /* Reuse the rail's logo rather than duplicating ~40KB of base64. */
+  const railLogo = document.querySelector(".start-rail .srlogo"), siLogo = $("#siLogo");
+  if(railLogo && siLogo) siLogo.src = railLogo.src;
+
   const form = $("#signinForm");
   if(form){
     form.addEventListener("submit", ev => {
