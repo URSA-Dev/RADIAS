@@ -27,3 +27,6 @@ soul.md
 # Generated demo output
 backend/evidence.generated.json
 backend/reconciliation.generated.json
+
+# Browser test artifacts
+.playwright-mcp/
